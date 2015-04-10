@@ -18,7 +18,9 @@
 
 namespace JMS\Serializer;
 
+use JMS\Serializer\Exception\LogicException;
 use JMS\Serializer\Exception\RuntimeException;
+use JMS\Serializer\Exclusion\ConjunctExclusionStrategy;
 use JMS\Serializer\Exclusion\DepthExclusionStrategy;
 use JMS\Serializer\Exclusion\DisjunctExclusionStrategy;
 use JMS\Serializer\Exclusion\ExclusionStrategyInterface;
@@ -32,6 +34,8 @@ use PhpCollection\Map;
 
 abstract class Context
 {
+    const EXCLUSION_LOGIC_DISJUNCTION = 'disjunct_exclude';
+    const EXCLUSION_LOGIC_CONJUNCTION = 'conjunct_exclude';
     /**
      * @var \PhpCollection\Map
      */
@@ -58,6 +62,11 @@ abstract class Context
 
     /** @var \SplStack */
     private $metadataStack;
+
+    /**
+     * @var
+     */
+    private $exclusionLogic = self::EXCLUSION_LOGIC_DISJUNCTION;
 
     public function __construct()
     {
@@ -139,10 +148,7 @@ abstract class Context
             return $this;
         }
 
-        $this->exclusionStrategy = new DisjunctExclusionStrategy(array(
-            $this->exclusionStrategy,
-            $strategy,
-        ));
+        $this->initExclusionStrategy($strategy);
 
         return $this;
     }
@@ -235,6 +241,29 @@ abstract class Context
     public function getMetadataStack()
     {
         return $this->metadataStack;
+    }
+
+    /**
+     * @param ExclusionStrategyInterface $strategy
+     */
+    protected function initExclusionStrategy(ExclusionStrategyInterface $strategy)
+    {
+        switch ($this->exclusionLogic) {
+            case static::EXCLUSION_LOGIC_CONJUNCTION :
+                $this->exclusionStrategy = new ConjunctExclusionStrategy(array(
+                    $this->exclusionStrategy,
+                    $strategy,
+                ));
+                break;
+            case static::EXCLUSION_LOGIC_DISJUNCTION :
+                $this->exclusionStrategy = new DisjunctExclusionStrategy(array(
+                    $this->exclusionStrategy,
+                    $strategy,
+                ));
+                break;
+            default:
+                throw new LogicException('unsupported logic type specified');
+        }
     }
 
     abstract public function getDepth();
