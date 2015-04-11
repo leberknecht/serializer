@@ -3,13 +3,16 @@
 namespace JMS\Serializer\Exclusion;
 
 
+use JMS\Serializer\Context;
+use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
+use PhpCollection\Sequence;
 use PhpCollection\SequenceInterface;
 
-class ConjunctExclusionStrategy
+abstract class AbstractBaseExclusionStrategy implements ExclusionStrategyInterface
 {
     /** @var SequenceInterface */
-    private $delegates;
+    protected $delegates;
 
     /**
      * @param ExclusionStrategyInterface[]|SequenceInterface $delegates
@@ -33,37 +36,18 @@ class ConjunctExclusionStrategy
      *
      * @param ClassMetadata $metadata
      *
-     * @return boolean
+     * @param Context $context
+     * @return bool
      */
-    public function shouldSkipClass(ClassMetadata $metadata, Context $context)
-    {
-        foreach ($this->delegates as $delegate) {
-            /** @var $delegate ExclusionStrategyInterface */
-            if (false == $delegate->shouldSkipClass($metadata, $context)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    abstract public function shouldSkipClass(ClassMetadata $metadata, Context $context);
 
     /**
      * Whether the property should be skipped.
      *
      * @param PropertyMetadata $property
      *
-     * @return boolean
+     * @param Context $context
+     * @return bool
      */
-    public function shouldSkipProperty(PropertyMetadata $property, Context $context)
-    {
-        foreach ($this->delegates as $delegate) {
-            /** @var $delegate ExclusionStrategyInterface */
-            if ($delegate->shouldSkipProperty($property, $context)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
+    abstract public function shouldSkipProperty(PropertyMetadata $property, Context $context);
 }

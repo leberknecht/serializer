@@ -20,9 +20,11 @@ namespace JMS\Serializer;
 
 use JMS\Serializer\Exception\LogicException;
 use JMS\Serializer\Exception\RuntimeException;
-use JMS\Serializer\Exclusion\ConjunctExclusionStrategy;
+use JMS\Serializer\Exclusion\AbstractBaseExclusionStrategy;
+use JMS\Serializer\Exclusion\ConjunctiveExclusionStrategy;
 use JMS\Serializer\Exclusion\DepthExclusionStrategy;
-use JMS\Serializer\Exclusion\DisjunctExclusionStrategy;
+use JMS\Serializer\Exclusion\DisjunctiveExclusionStrategy;
+use JMS\Serializer\Exclusion\ExclusionStrategyFactory;
 use JMS\Serializer\Exclusion\ExclusionStrategyInterface;
 use JMS\Serializer\Exclusion\GroupsExclusionStrategy;
 use JMS\Serializer\Exclusion\VersionExclusionStrategy;
@@ -34,8 +36,6 @@ use PhpCollection\Map;
 
 abstract class Context
 {
-    const EXCLUSION_LOGIC_DISJUNCTION = 'disjunct_exclude';
-    const EXCLUSION_LOGIC_CONJUNCTION = 'conjunct_exclude';
     /**
      * @var \PhpCollection\Map
      */
@@ -64,9 +64,9 @@ abstract class Context
     private $metadataStack;
 
     /**
-     * @var
+     * @var string
      */
-    private $exclusionLogic = self::EXCLUSION_LOGIC_DISJUNCTION;
+    private $exclusionLogic = ExclusionStrategyFactory::EXCLUSION_LOGIC_DISJUNCTION;
 
     public function __construct()
     {
@@ -142,19 +142,22 @@ abstract class Context
             return $this;
         }
 
-        if ($this->exclusionStrategy instanceof DisjunctExclusionStrategy) {
+        if ($this->exclusionStrategy instanceof AbstractBaseExclusionStrategy) {
             $this->exclusionStrategy->addStrategy($strategy);
 
             return $this;
         }
 
-        $this->initExclusionStrategy($strategy);
+        $this->exclusionStrategy = ExclusionStrategyFactory::createBaseExclusionStrategy(
+            $this->exclusionLogic, $strategy
+        );
 
         return $this;
     }
 
     /**
      * @param integer $version
+     * @return $this
      */
     public function setVersion($version)
     {
@@ -170,6 +173,7 @@ abstract class Context
 
     /**
      * @param array|string $groups
+     * @return $this
      */
     public function setGroups($groups)
     {
@@ -241,29 +245,6 @@ abstract class Context
     public function getMetadataStack()
     {
         return $this->metadataStack;
-    }
-
-    /**
-     * @param ExclusionStrategyInterface $strategy
-     */
-    protected function initExclusionStrategy(ExclusionStrategyInterface $strategy)
-    {
-        switch ($this->exclusionLogic) {
-            case static::EXCLUSION_LOGIC_CONJUNCTION :
-                $this->exclusionStrategy = new ConjunctExclusionStrategy(array(
-                    $this->exclusionStrategy,
-                    $strategy,
-                ));
-                break;
-            case static::EXCLUSION_LOGIC_DISJUNCTION :
-                $this->exclusionStrategy = new DisjunctExclusionStrategy(array(
-                    $this->exclusionStrategy,
-                    $strategy,
-                ));
-                break;
-            default:
-                throw new LogicException('unsupported logic type specified');
-        }
     }
 
     abstract public function getDepth();

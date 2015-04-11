@@ -31,34 +31,10 @@ use PhpCollection\SequenceInterface;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class DisjunctExclusionStrategy implements ExclusionStrategyInterface
+class DisjunctiveExclusionStrategy extends AbstractBaseExclusionStrategy
 {
-    /** @var \PhpCollection\SequenceInterface */
-    private $delegates;
-
     /**
-     * @param ExclusionStrategyInterface[]|SequenceInterface $delegates
-     */
-    public function __construct($delegates)
-    {
-        if ( ! $delegates instanceof SequenceInterface) {
-            $delegates = new Sequence($delegates);
-        }
-
-        $this->delegates = $delegates;
-    }
-
-    public function addStrategy(ExclusionStrategyInterface $strategy)
-    {
-        $this->delegates->add($strategy);
-    }
-
-    /**
-     * Whether the class should be skipped.
-     *
-     * @param ClassMetadata $metadata
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
     public function shouldSkipClass(ClassMetadata $metadata, Context $context)
     {
@@ -73,11 +49,7 @@ class DisjunctExclusionStrategy implements ExclusionStrategyInterface
     }
 
     /**
-     * Whether the property should be skipped.
-     *
-     * @param PropertyMetadata $property
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
     public function shouldSkipProperty(PropertyMetadata $property, Context $context)
     {
