@@ -19,6 +19,7 @@
 namespace JMS\Serializer\Tests\Serializer;
 
 use JMS\Serializer\Context;
+use JMS\Serializer\Exclusion\ExclusionStrategyFactory;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\SerializationContext;
@@ -146,5 +147,27 @@ class ContextTest extends \PHPUnit_Framework_TestCase
 
         $serializer = SerializerBuilder::create()->build();
         $serializer->serialize($object, 'json', SerializationContext::create()->addExclusionStrategy($exclusionStrategy));
+    }
+
+    public function testSetExclusionLogic()
+    {
+        $object = new Node();
+        $exclusionStrategy1 = $this->getMock('JMS\Serializer\Exclusion\ExclusionStrategyInterface');
+        $exclusionStrategy1->expects($this->any())
+            ->method('shouldSkipProperty')
+            ->will($this->returnValue(true));
+
+        $exclusionStrategy2 = $this->getMock('JMS\Serializer\Exclusion\ExclusionStrategyInterface');
+        $exclusionStrategy2->expects($this->any())
+            ->method('shouldSkipProperty')
+            ->will($this->returnValue(false));
+
+        $serializer = SerializerBuilder::create()->build();
+        $context = SerializationContext::create()
+            ->addExclusionStrategy($exclusionStrategy1)
+            ->addExclusionStrategy($exclusionStrategy2);
+
+        $context->setExclusionLogic(ExclusionStrategyFactory::EXCLUSION_LOGIC_CONJUNCTION);
+        $serializer->serialize($object, 'json', $context);
     }
 }

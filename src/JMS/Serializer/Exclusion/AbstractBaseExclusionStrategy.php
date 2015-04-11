@@ -15,12 +15,12 @@ abstract class AbstractBaseExclusionStrategy implements ExclusionStrategyInterfa
     protected $delegates;
 
     /**
-     * @param ExclusionStrategyInterface[]|SequenceInterface $delegates
+     * @param ExclusionStrategyInterface | SequenceInterface $delegates
      */
     public function __construct($delegates)
     {
         if ( ! $delegates instanceof SequenceInterface) {
-            $delegates = new Sequence($delegates);
+            $delegates = new Sequence([$delegates]);
         }
 
         $this->delegates = $delegates;

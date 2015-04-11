@@ -21,8 +21,6 @@ namespace JMS\Serializer\Exclusion;
 use JMS\Serializer\Context;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
-use PhpCollection\Sequence;
-use PhpCollection\SequenceInterface;
 
 /**
  * Disjunct Exclusion Strategy.

@@ -12,11 +12,11 @@ class ExclusionStrategyFactory
 
     /**
      * @param string $exclusionLogic
-     * @param ExclusionStrategyInterface[]|SequenceInterface $delegates
+     * @param ExclusionStrategyInterface $delegates
      * @return AbstractBaseExclusionStrategy
      * @throws LogicException
      */
-    public static function createBaseExclusionStrategy($exclusionLogic, $delegates)
+    public static function createBaseExclusionStrategy($exclusionLogic, ExclusionStrategyInterface $delegates)
     {
         switch ($exclusionLogic) {
             case static::EXCLUSION_LOGIC_CONJUNCTION :

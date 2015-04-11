@@ -247,6 +247,22 @@ abstract class Context
         return $this->metadataStack;
     }
 
+    /**
+     * @return string
+     */
+    public function getExclusionLogic()
+    {
+        return $this->exclusionLogic;
+    }
+
+    /**
+     * @param string $exclusionLogic
+     */
+    public function setExclusionLogic($exclusionLogic)
+    {
+        $this->exclusionLogic = $exclusionLogic;
+    }
+
     abstract public function getDepth();
 
     /**
