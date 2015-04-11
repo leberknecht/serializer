@@ -183,7 +183,9 @@ Imagine you have a member with the following exclusion rules:
         private $title;
     }
 
-And your serializer call looks like this::
+And your serializer call looks like this:
+
+.. code-block :: php
 
     use JMS\Serializer\SerializationContext;
     $context = SerializationContext::create()->setGroups(array('list'))->setVersion(1);
@@ -191,7 +193,9 @@ And your serializer call looks like this::
 
 
 The ```$title``` property will be excluded as the version does not match, although the group is correct
-You can change this behavior by setting conjunctive exclusion logic like this::
+You can change this behavior by setting conjunctive exclusion logic like this:
+
+.. code-block :: php
 
     use JMS\Serializer\SerializationContext;
     $context = SerializationContext::create()->setGroups(array('list'))->setVersion(1);
