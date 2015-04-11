@@ -161,3 +161,40 @@ You need to tell the serializer to take into account MaxDepth checks::
     use JMS\Serializer\SerializationContext;
 
     $serializer->serialize($data, 'json', SerializationContext::create()->enableMaxDepthChecks());
+
+
+Disjunctive and conjunctive exclusion logic
+-------------------------------------------
+The default exclusion logic is disjunctive, meaning: a class or property is skipped as soon as one
+exclusion-strategy wants to skip it, regardless of other strategies attached to the class/property.
+Imagine you have a member with the following exclusion rules:
+
+.. code-block :: php
+
+    use JMS\Serializer\Annotation\Groups;
+    use JMS\Serializer\Annotation\Version;
+
+    class BlogPost
+    {
+        /**
+         * @Groups({"list"})
+         * @Since("1.1")
+         */
+        private $title;
+    }
+
+And your serializer call looks like this:
+
+    use JMS\Serializer\SerializationContext;
+    $context = SerializationContext::create()->setGroups(array('list'))->setVersion(1);
+    $serializer->serialize(new BlogPost(), 'json', $context);
+
+The ```$title``` property will be excluded as the version does not match, although the group is correct
+You can change this behavior by setting conjunctive exclusion logic like this:
+
+    use JMS\Serializer\SerializationContext;
+    $context = SerializationContext::create()->setGroups(array('list'))->setVersion(1);
+    $context->setExclusionLogic(ExclusionStrategyFactory::EXCLUSION_LOGIC_CONJUNCTION);
+    $serializer->serialize(new BlogPost(), 'json', $context);
+
+Now the property will only be excluded if ALL attached exclusion strategies agree to exclude it.
